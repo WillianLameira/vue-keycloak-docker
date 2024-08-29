@@ -9,7 +9,7 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView,
-    meta: { requiresAuth: true } // Adiciona meta para rotas que requerem autenticação
+    meta: { requiresAuth: true } // Adiciona meta para rotas que não requerem autenticação
   },
   {
     path: '/about',
@@ -21,14 +21,14 @@ const routes = [
 
 // Cria o roteador
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(import.meta.env.VITE_BASE_URL),
   routes
 })
 
 // Adiciona o guardião de navegação
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // Verifica se o usuário está autenticado
+    // Verifica se o usuário está autenticado  
     if (keycloak.authenticated) {
       next()
     } else {

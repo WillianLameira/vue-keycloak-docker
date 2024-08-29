@@ -1,12 +1,13 @@
-import Keycloak from "keycloak-js";
+import Keycloak from 'keycloak-js'
 
-const keycloakConfig = {
-  url: "http://localhost:8080/auth",
-  realm: "farmaxis", // Substitua pelo seu realm
-  clientId: "api-client", // Substitua pelo seu clientId
-};
+// Configurações do Keycloak usando variáveis de ambiente
+const keycloak = new Keycloak({
+  url: import.meta.env.VITE_KEYCLOAK_URL,
+  realm: import.meta.env.VITE_KEYCLOAK_REALM,
+  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID
+});
 
-const keycloak = new Keycloak(keycloakConfig);
+// Adiciona uma propriedade para verificar se o Keycloak está inicializado
+keycloak.initialized = false;
 
 export default keycloak;
-
