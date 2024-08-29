@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AboutView from '../views/AboutView.vue'
-import keycloak from '../keycloak'
+import KeycloakService from '@/services/KeycloakService'
 
 // Define as rotas
 const routes = [
@@ -9,13 +9,22 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomeView,
-    meta: { requiresAuth: true } // Adiciona meta para rotas que não requerem autenticação
+    meta: { requiredPermissions: [] } // Adicione permissões necessárias aqui
   },
   {
     path: '/about',
     name: 'about',
     component: AboutView,
-    meta: { requiresAuth: true } // Adiciona meta para rotas que requerem autenticação
+    meta: { requiredPermissions: [] } // Adicione permissões necessárias aqui
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    beforeEnter: (to, from, next) => {
+      // Chama o serviço de logout
+      KeycloakService.logoutFromClient()
+      next('/') // Redireciona para a página inicial após o logout
+    }
   }
 ]
 
@@ -25,16 +34,11 @@ const router = createRouter({
   routes
 })
 
-// Adiciona o guardião de navegação
-router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    // Verifica se o usuário está autenticado  
-    if (keycloak.authenticated) {
-      next()
-    } else {
-      // Redireciona para o login se não estiver autenticado
-      keycloak.login()
-    }
+// Middleware de navegação para verificar permissões
+router.beforeEach(async (to, from, next) => {
+  const userHasRoles = KeycloakService.userHasRoles(to.meta.requiredPermissions || [])
+  if (to.meta.requiredPermissions && !userHasRoles) {
+    next({ name: from.name || 'home' }) // Redireciona se não tiver permissões
   } else {
     next()
   }
